@@ -14,15 +14,27 @@ public class MovementHandler : MonoBehaviour
     public List<Transform> debrisToDropList = new();
     Vector3[] wayPointsPos = new Vector3[5] ;
 
-    int onTruck = 0;
-    int x = 0;
+    public int onTruck = 0;
+    public int x = 0;
+
+    float totalDistance = 0;
+    int numberOfCycles = 0;
+
+    private float totalTimePassed = 0f;
+
+    bool canPass;
 
     Vector3 extraHeight = new Vector3(0, 0.4f, 0);
     void Start()
     {
+
+        
+        canPass = false;            
         truckDebrisHandler = GetComponent<TruckDebrisHandler>();
-        if (truckDebrisHandler == null)
-            Debug.Log("bhai ruk");
+
+        uIHandler.UpdateCollectedUI(0, debrisHandler.maxDebrisCapacity);
+        uIHandler.UpdateOnTruckUI(0, truckDebrisHandler.maxDebrisCapacity);
+
         foreach(Transform t in dropLoadArea)
         {
             dropPoint.Add(t);
@@ -31,38 +43,50 @@ public class MovementHandler : MonoBehaviour
         
     }
 
+    void FinalMessage()
+    {
+        canPass = false;
+        uIHandler.UpdateMainText(totalTimePassed, totalDistance, numberOfCycles, truckDebrisHandler.maxDebrisCapacity, debrisHandler.maxDebrisCapacity);
+    }
+
     public void Move()
     {
+        canPass = true;
         (Transform closestDebris, int closestIndex) = GetClosestObject.DebrisTranform(debrisHandler.debrisList, transform);
        
         transform.LookAt(closestDebris);
         transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
-        float dist = (transform.position  - closestDebris.position).magnitude;
+        float dist = (transform.position - closestDebris.position).magnitude;
+        totalDistance += dist;
         transform.DOMove(closestDebris.position + extraHeight, dist/velocity).OnComplete(() =>
         {
             onTruck++;
+            uIHandler.UpdateOnTruckUI(onTruck, truckDebrisHandler.maxDebrisCapacity);
             truckDebrisHandler.PickUp();
             debrisHandler.debrisList.RemoveAt(closestIndex);
             closestDebris.gameObject.SetActive(false);
             debrisToDropList.Add(closestDebris);
-            if (x < debrisHandler.debrisList.Count && onTruck < truckDebrisHandler.maxDebrisCapacity)
+            
+            if (onTruck < truckDebrisHandler.maxDebrisCapacity && debrisHandler.debrisList.Count > 0)
             {
                 Move();
+
             }
             else
             {
                 MoveToDrop();
             }
-                
         });
-       // 
+     
     }
 
     void MoveToDrop()
     {
+        numberOfCycles++;
         Transform nearestDrop = NearestDropPoint();
         transform.LookAt(nearestDrop);
         float dist = (transform.position - nearestDrop.position).magnitude;
+        totalDistance += dist;
         transform.DOMove(nearestDrop.position, dist / velocity).OnComplete(() => 
         {
             onTruck = 0;
@@ -74,15 +98,24 @@ public class MovementHandler : MonoBehaviour
 
     void DropLoop()
     {
-        if (debrisToDropList.Count > 0)
+        if (x < debrisHandler.maxDebrisCapacity)
         {
-            truckDebrisHandler.Drop();
-            DropAnimation(debrisToDropList[debrisToDropList.Count - 1]);         
-            debrisToDropList.Remove(debrisToDropList[debrisToDropList.Count - 1]);
+            if (debrisToDropList.Count > 0)
+            {
+                truckDebrisHandler.Drop();
+                DropAnimation(debrisToDropList[debrisToDropList.Count - 1]);
+                debrisToDropList.Remove(debrisToDropList[debrisToDropList.Count - 1]);
+            }
+            else
+            {
+                Move();
+            }
+
         }
         else
         {
-            Move();
+            FinalMessage();
+            Debug.Log("done" + debrisHandler.debrisList.Count);
         }
     }
 
@@ -93,6 +126,8 @@ public class MovementHandler : MonoBehaviour
         debris.gameObject.SetActive(true);
         debris.DOLocalPath(wayPointsPos,1f, PathType.CatmullRom).SetOptions(false, AxisConstraint.None).SetEase(Ease.InSine).OnComplete(() => 
         {
+            x++;
+            uIHandler.UpdateCollectedUI(x, debrisHandler.maxDebrisCapacity);
             DropLoop();
         });
     }
@@ -121,6 +156,10 @@ public class MovementHandler : MonoBehaviour
         {
             //truckDebrisHandler.PickUp();
             Move();
+        }
+        if(canPass)
+        {
+            totalTimePassed += Time.deltaTime;
         }
     }
 }

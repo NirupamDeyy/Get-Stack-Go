@@ -9,8 +9,7 @@ public class DebrisHandler : MonoBehaviour
     [SerializeField]
     private Transform origin;
 
-    [SerializeField]
-    private int maxDebrisCapacity;
+    public int maxDebrisCapacity;
 
     [SerializeField]
     private int xArea, yArea;
