@@ -356,9 +356,11 @@
 -analyzer:"C:/Program Files/Unity/Hub/Editor/2022.3.14f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll"
 -analyzer:"C:/Program Files/Unity/Hub/Editor/2022.3.14f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Scripts/DebrisHandler.cs"
-"Assets/Scripts/GetClosestDebris.cs"
+"Assets/Scripts/DrawGizmos.cs"
+"Assets/Scripts/GetClosestObject.cs"
 "Assets/Scripts/MovementHandler.cs"
 "Assets/Scripts/TruckDebrisHandler.cs"
+"Assets/Scripts/UIHandler.cs"
 -langversion:9.0
 
 /deterministic

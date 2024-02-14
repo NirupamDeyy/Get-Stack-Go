@@ -10,7 +10,7 @@ public class TruckDebrisHandler : MonoBehaviour
     private Transform debrisParent;
 
     [SerializeField]
-    private int maxHorizontalCapacity = 6, maxDebrisCapacity;
+    public int maxHorizontalCapacity = 6, maxDebrisCapacity, currentDebrisCountOnTruck = 0;
 
     [SerializeField]
     private List<Transform> debrisList = new();
@@ -28,7 +28,7 @@ public class TruckDebrisHandler : MonoBehaviour
                 {
                     Transform debris = InstantiateDebris(i, j);
                     debrisList.Add(debris);
-                    //debris.gameObject.SetActive(false);
+                    debris.gameObject.SetActive(false);
                     cache--;
                 }
                 else
@@ -49,9 +49,24 @@ public class TruckDebrisHandler : MonoBehaviour
         return debris;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void PickUp()
     {
         
+
+        if (currentDebrisCountOnTruck < maxDebrisCapacity)
+        {
+            
+
+            debrisList[currentDebrisCountOnTruck].gameObject.SetActive(true);
+            currentDebrisCountOnTruck++;
+        }
     }
+    public void Drop()
+    {
+        
+        debrisList[currentDebrisCountOnTruck - 1].gameObject.SetActive(false);
+
+        currentDebrisCountOnTruck--;
+    }
+    
 }

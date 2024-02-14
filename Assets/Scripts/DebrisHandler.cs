@@ -47,7 +47,8 @@ public class DebrisHandler : MonoBehaviour
         debris.rotation = Quaternion.Euler(0,Random.Range(-90, 90) , 0);
         return debris;
     }
-    // Update is called once per frame
+
+
     void Update()
     {
         
